@@ -1,0 +1,72 @@
+function requestEstimate() {
+
+  //Define Uber API Token
+  var token = "[YourUberToken]";
+  
+  //Define the active sheet to pull and record data
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet();
+     
+  //Define where to find the Start Latitude for the trip   
+  var startLatRange = sheet.getRange(3,9); 
+  var startlat = startLatRange.getValue();
+   
+  //Define where to find the Start Longitude for the trip 
+  var startLongRange = sheet.getRange(3,10); 
+  var startlong = startLongRange.getValue();
+   
+  //Define where to find the End Latitude for the trip 
+  var endLatRange = sheet.getRange(4,9); 
+  var endlat = endLatRange.getValue();
+   
+  //Define where to find the End Longitude for the trip 
+  var endtLongRange = sheet.getRange(4,10); 
+  var endlong = endtLongRange.getValue();
+  
+  //Define where to find the ProductID for your Uber. This could be UberZIP, UberX, UberGO, etc. based on your region
+  var ProIdRange = sheet.getRange(5,3); 
+  var ProId = ProIdRange.getValue();
+  
+ 
+   //Call UBER API to get an estimate for the above trip
+  
+     var api2 = "https://api.uber.com/v1.2/requests/estimate";  // example
+     var authheaders2 =  'Bearer ' + token;
+     
+        var data = {
+            "product_id": ProId, 
+            "start_latitude": startlat, 
+            "start_longitude": startlong, 
+            "end_latitude": endlat, 
+            "end_longitude": endlong,
+            "seat_count": "2"
+             };
+  
+  
+       var options2 = {
+             "headers": {Authorization: authheaders2},
+             "method" : "POST",
+             "muteHttpExceptions": true,
+             'contentType': 'application/json',
+             'payload' : JSON.stringify(data)
+              };
+     
+       var response2 = UrlFetchApp.fetch(api2, options2);
+       var data = JSON.parse(response2);
+
+        var fare = data["fare"];
+        var fareid = fare.fare_id;
+        var amount = fare.display;
+         
+        var estimate = data["pickup_estimate"];
+        var durationEstimate = data["trip"].duration_estimate;
+
+//Output values to the sheet. Change the coordinates to fit where you need to show this data on the sheet.
+
+     sheet.getRange(2,2).setValue(fareid);
+     sheet.getRange(3,2).setValue(amount);
+     sheet.getRange(4,2).setValue(estimate);
+     sheet.getRange(6,5).setValue(durationEstimate);
+
+
+}
